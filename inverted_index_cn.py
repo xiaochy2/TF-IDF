@@ -145,14 +145,14 @@ if __name__ == '__main__':
     #
     # documents.setdefault("doc1", doc1)
     # documents.setdefault("doc2", doc2)
-    root_dir = 'documents_cn'
+    root_dir = 'documents_test'
     documents = {}
-    for dir in os.listdir(root_dir):
-        for (root, dirs, files) in os.walk(dir):
-            for filename in files:
-                if filename != '.DS_Store' or 'bookkeeping.json' or 'bookkeeping.tsv':
-                    f = open(root +'/'+ filename).read()
-                    documents.setdefault((root +'/'+ filename).decode('utf-8'), f)
+    
+    for (root, dirs, files) in os.walk(root_dir):
+        for filename in files:
+            if filename != '.DS_Store' or 'bookkeeping.json' or 'bookkeeping.tsv':
+                f = open(root +'/'+ filename).read()
+                documents.setdefault((root +'/'+ filename).decode('utf-8'), f)
     for doc_id, text in documents.iteritems():
         doc_index = inverted_index(text)
         inverted_index_add(inverted, doc_id, doc_index)
