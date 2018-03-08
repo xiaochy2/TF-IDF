@@ -209,6 +209,7 @@ if __name__ == '__main__':
     count = 0
     begin = time.clock()
     start = time.clock()
+    print len(documents)
     for doc_id, text in documents.iteritems():
         count += 1
         doc_index = inverted_index(text)
