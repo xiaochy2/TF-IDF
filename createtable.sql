@@ -33,3 +33,13 @@ create table `indexS_Z`
 	`docu` varchar(100) not null,
 	`score` decimal(8,4) not null
 );
+
+
+
+--test table
+create table `index`
+(
+	`term` varchar(100) not null,
+	`docu` varchar(100) not null,
+	`score` decimal(8,4) not null
+);
