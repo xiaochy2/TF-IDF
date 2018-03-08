@@ -1,32 +1,31 @@
 <?xml version='1.0' encoding='ISO-8859-1'?> 
-<!-- indexer: contains all tokens -->
-<!-- word: stand for single token -->  
-<!-- w: name of the token --> 
-<!-- ds: stand for documents that contain the token, one token can exists in lots of documents --> 
-<!-- d: stand for one single document that contains this token--> 
-<!-- l1: (level 1)outer file name that contains this document --> 
-<!-- l2: (level 2)iner file name that contains this document --> 
-<!-- wps； stand for word positions that this token shows up, one token can exists in lots of different positions in one document -->
-<!-- wp: stand for one single word position that this token shows up-->  
-<!-- lps: stand for letter position that this token shows up-->
-<!-- lp: stand for one single letter position that this token shows up-->
-<indexer>
-	<word>
-		<w>0</w>
+<!-- index: contains all tokens -->
+<!-- w: stand for single token -->
+<!-- n: name of the token -->
+<!-- ds: stand for documents that contain the token, one token can exists in lots of documents -->
+<!-- d: stand for one single document that contains this token-->
+<!-- dn: one single document name-->
+<!-- tf-idf: tf-idf -->
+<!-- p: position -->
+<!-- wp: word position -->
+<!-- lp: letter position-->
+<index>
+    <w>
+        <n>0</n>
 		<ds>
 			<d>
-				<l1>2</l1>
-				<l2>2</l2>
-				<wps>
+				<dn>2/5</dn>
+				<tf-idf></tf-idf>
+				<p>
 					<wp>196</wp>
-					<wp>201</wp>
-					<wp>203</wp>
-				</ps>
-				<lps>
-					<lp>2195</lp>
+					<lp>201</wp>
+					
+				</p>
+				<p>
+					<wp>2195</lp>
 					<lp>2209</lp>
-					<lp>2218</lp>
-				</lps>
+					
+				</p>
 			</d>
 
 
@@ -35,11 +34,11 @@
 			</d>
 
 		</ds>
-	<word>
+	</w>
 
 
-	<word>
+	<w>
 		...
-	</word>
-
+	</w>
+</index>
 

@@ -1,7 +1,9 @@
 # coding:utf-8
 import os
 import re
+from nltk.stem import PorterStemmer
 import sys
+import time
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -47,9 +49,10 @@ _STOP_WORDS = frozenset([
 
 
 def word_split(text):
-    print text
+    #print text
     word_list = []
     token = []
+    ps=PorterStemmer()
     
     token += re.sub("[^A-Za-z0-9]", " ", text).split()
     #print token
@@ -64,7 +67,7 @@ def word_split(text):
             time[c] = 1
             
         ind = text.index(c, ind)
-        word_list.append((len(word_list), (ind, c.lower())))  # include normalize
+        word_list.append((len(word_list), (ind, ps.stem(c.lower()))))  # include normalize
         ind += 1
     #print word_list
     return word_list
@@ -75,6 +78,7 @@ def words_cleanup(words):
     for index, (offset, word) in words:  # words-(word index for search,(letter offset for display,word))
         if word in _STOP_WORDS:
             continue
+        
         cleaned_words.append((index, (offset, word)))
     return cleaned_words
 
@@ -136,26 +140,85 @@ def precise(precise_doc_dic, doc, index_list, offset_list, range):
         precise_doc_dic[doc] = phrase_offset
     return precise_doc_dic
 
-
+def write_to_file(result):
+    output=open('index.xml','w')
+    try:
+        output.truncate()
+        print "Writing to file..."
+        output.write("<?xml version='1.0' encoding='ISO-8859-1'?>"+"\n")
+        output.write("<!-- index: contains all tokens -->"+"\n")
+        output.write("<!-- w: stand for single token -->"+"\n")
+        output.write("<!-- n: name of the token -->"+"\n")
+        output.write("<!-- ds: stand for documents that contain the token, one token can exists in lots of documents -->"+"\n")
+        output.write("<!-- d: stand for one single document that contains this token-->"+"\n")
+        output.write("<!-- dn: one single document name-->"+"\n")
+        output.write("<!-- tf-idf: tf-idf -->"+"\n")
+        output.write("<!-- p: position -->"+"\n")
+        output.write("<!-- wp: word position -->"+"\n")
+        output.write("<!-- lp: letter position-->"+"\n")
+        output.write("<index>"+"\n")
+        
+        
+        for (word,element) in result:
+            output.write("<w>"+"\n")
+            output.write("<n>"+word+"</n>"+"\n")
+            output.write("<ds>"+"\n")
+            
+            #i = len(element)
+            for file in element:
+                output.write("<d>"+"\n")
+                output.write("<dn>"+file+"</dn>"+"\n")
+                output.write("<tf-idf>"+str(6)+"</tf-idf>"+"\n")
+                
+                for position in element[file]:
+                    output.write("<p>"+"\n")
+                    output.write("<wp>"+str(position[0])+"</wp>"+"\n")
+                    output.write("<lp>"+str(position[1])+"</lp>"+"\n")
+                    output.write("</p>"+"\n")
+                output.write("</d>"+"\n")
+            output.write("</ds>"+"\n")
+            output.write("</w>"+"\n")
+                #i-=1
+                #if i>0:
+                   # output1.write(",")
+        output.write("</index>")
+        
+        
+        
+    finally:
+        output.close()
+        print "Finish writing!"
+        
+        
 if __name__ == '__main__':
     
     # Build Inverted-Index for documents
     inverted = {}
     
     root_dir = 'documents_test'
+    #root_dir = '/Users/snorlax/Downloads/WEBPAGES_CLEAN'
+    
     documents = {}
     
     for (root, dirs, files) in os.walk(root_dir):
         for filename in files:
-            if filename != '.DS_Store' or 'bookkeeping.json' or 'bookkeeping.tsv':
+            if filename != ".DS_Store" and filename != "bookkeeping.json" and filename != "bookkeeping.tsv":
+                #print filename
                 f = open(root +'/'+ filename).read()
                 documents.setdefault((root[len(root_dir)+1:] +'/'+ filename), f)
-    
+    count = 0
+    begin = time.clock()
+    start = time.clock()
     for doc_id, text in documents.iteritems():
-        print "Processing" + str(doc_id) + "document" + "..."
+        count += 1
         doc_index = inverted_index(text)
         inverted_index_add(inverted, doc_id, doc_index)
-    print "Finish all files"
+        if count%400 == 0:
+            elapsed = (time.clock() - start)
+            print str(count) + " documents have been processed, " + str(elapsed) + "s for these 400 documents"
+            start = time.clock()
+            
+    print "Finish all files, " + "overall time: " + str(time.clock()-begin) + "s"
     #
     # Print Inverted-Index
     #for word, doc_locations in inverted.iteritems():
@@ -163,29 +226,8 @@ if __name__ == '__main__':
 
     # Search something and print results
     result=sorted(inverted.items(),key=lambda k:k[0])
-    output1=open('index.txt','w')
-       
-    try:
-        output1.truncate()
-        print "Writing to file..."
-        for (word,element) in result:
-            output1.write(word+"\t")
-            
-            i = len(element)
-            for file in element:
-                
-                output1.write(file+":")
-                for position in element[file]:
-                    output1.write("("+str(position[0])+","+str(position[1])+")")
-                i-=1
-                if i>0:
-                    output1.write(",")
-            output1.write("\n")
-            
-        
-    finally:
-        output1.close()
-
+    write_to_file(result)
+'''
     queries = ['mondego','machine learning','software engineering','security','student affairs','graduate courses']
     for query in queries:
         result_docs = search(inverted, query)
@@ -200,3 +242,4 @@ if __name__ == '__main__':
             print 'Nothing found!'
 
         print
+'''
