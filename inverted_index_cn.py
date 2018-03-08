@@ -4,6 +4,7 @@ import re
 from nltk.stem import PorterStemmer
 import sys
 import time
+import math
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -105,6 +106,12 @@ def inverted_index_add(inverted, doc_id, doc_index):
         indices[doc_id] = locations
     return inverted
 
+def tf(numOfp):
+    return 1+math.log10(numOfp)
+    
+    
+def idf(N,leng):
+    return math.log10(N/float(leng))
 
 def search(inverted, query):
     words = [word for _, (offset, word) in word_index(query) if word in inverted]  # query_words_list
@@ -140,7 +147,7 @@ def precise(precise_doc_dic, doc, index_list, offset_list, range):
         precise_doc_dic[doc] = phrase_offset
     return precise_doc_dic
 
-def write_to_file(result):
+def write_to_file(result,N):
     output=open('index.xml','w')
     try:
         output.truncate()
@@ -158,17 +165,21 @@ def write_to_file(result):
         output.write("<!-- lp: letter position-->"+"\n")
         output.write("<index>"+"\n")
         
-        
+       
         for (word,element) in result:
             output.write("<w>"+"\n")
             output.write("<n>"+word+"</n>"+"\n")
             output.write("<ds>"+"\n")
             
             #i = len(element)
+            
+            df = idf(N,len(element))
+            
             for file in element:
                 output.write("<d>"+"\n")
                 output.write("<dn>"+file+"</dn>"+"\n")
-                output.write("<tf-idf>"+str(6)+"</tf-idf>"+"\n")
+                
+                output.write("<tf-idf>"+str(tf(len(element[file]))*df)+"</tf-idf>"+"\n")
                 
                 for position in element[file]:
                     output.write("<p>"+"\n")
@@ -206,10 +217,11 @@ if __name__ == '__main__':
                 #print filename
                 f = open(root +'/'+ filename).read()
                 documents.setdefault((root[len(root_dir)+1:] +'/'+ filename), f)
+    N = len(documents)
     count = 0
     begin = time.clock()
     start = time.clock()
-    print len(documents)
+    #print len(documents)
     for doc_id, text in documents.iteritems():
         count += 1
         doc_index = inverted_index(text)
@@ -227,7 +239,7 @@ if __name__ == '__main__':
 
     # Search something and print results
     result=sorted(inverted.items(),key=lambda k:k[0])
-    write_to_file(result)
+    write_to_file(result,N)
 '''
     queries = ['mondego','machine learning','software engineering','security','student affairs','graduate courses']
     for query in queries:
