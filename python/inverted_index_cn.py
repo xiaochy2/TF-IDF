@@ -8,45 +8,7 @@ import math
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-_STOP_WORDS = frozenset([
-    'a', 'about', 'above', 'above', 'across', 'after', 'afterwards', 'again',
-    'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although',
-    'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and', 'another',
-    'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'are', 'around', 'as',
-    'at', 'back', 'be', 'became', 'because', 'become', 'becomes', 'becoming', 'been',
-    'before', 'beforehand', 'behind', 'being', 'below', 'beside', 'besides',
-    'between', 'beyond', 'bill', 'both', 'bottom', 'but', 'by', 'call', 'can',
-    'cannot', 'cant', 'co', 'con', 'could', 'couldnt', 'cry', 'de', 'describe',
-    'detail', 'do', 'done', 'down', 'due', 'during', 'each', 'eg', 'eight',
-    'either', 'eleven', 'else', 'elsewhere', 'empty', 'enough', 'etc', 'even',
-    'ever', 'every', 'everyone', 'everything', 'everywhere', 'except', 'few',
-    'fifteen', 'fify', 'fill', 'find', 'fire', 'first', 'five', 'for', 'former',
-    'formerly', 'forty', 'found', 'four', 'from', 'front', 'full', 'further', 'get',
-    'give', 'go', 'had', 'has', 'hasnt', 'have', 'he', 'hence', 'her', 'here',
-    'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him',
-    'himself', 'his', 'how', 'however', 'hundred', 'ie', 'if', 'in', 'inc',
-    'indeed', 'interest', 'into', 'is', 'it', 'its', 'itself', 'keep', 'last',
-    'latter', 'latterly', 'least', 'less', 'ltd', 'made', 'many', 'may', 'me',
-    'meanwhile', 'might', 'mill', 'mine', 'more', 'moreover', 'most', 'mostly',
-    'move', 'much', 'must', 'my', 'myself', 'name', 'namely', 'neither', 'never',
-    'nevertheless', 'next', 'nine', 'no', 'nobody', 'none', 'noone', 'nor', 'not',
-    'nothing', 'now', 'nowhere', 'of', 'off', 'often', 'on', 'once', 'one', 'only',
-    'onto', 'or', 'other', 'others', 'otherwise', 'our', 'ours', 'ourselves', 'out',
-    'over', 'own', 'part', 'per', 'perhaps', 'please', 'put', 'rather', 're', 'same',
-    'see', 'seem', 'seemed', 'seeming', 'seems', 'serious', 'several', 'she',
-    'should', 'show', 'side', 'since', 'sincere', 'six', 'sixty', 'so', 'some',
-    'somehow', 'someone', 'something', 'sometime', 'sometimes', 'somewhere',
-    'still', 'such', 'system', 'take', 'ten', 'than', 'that', 'the', 'their',
-    'them', 'themselves', 'then', 'thence', 'there', 'thereafter', 'thereby',
-    'therefore', 'therein', 'thereupon', 'these', 'they', 'thickv', 'thin', 'third',
-    'this', 'those', 'though', 'three', 'through', 'throughout', 'thru', 'thus',
-    'to', 'together', 'too', 'top', 'toward', 'towards', 'twelve', 'twenty', 'two',
-    'un', 'under', 'until', 'up', 'upon', 'us', 'very', 'via', 'was', 'we', 'well',
-    'were', 'what', 'whatever', 'when', 'whence', 'whenever', 'where', 'whereafter',
-    'whereas', 'whereby', 'wherein', 'whereupon', 'wherever', 'whether', 'which',
-    'while', 'whither', 'who', 'whoever', 'whole', 'whom', 'whose', 'why', 'will',
-    'with', 'within', 'without', 'would', 'yet', 'you', 'your', 'yours', 'yourself',
-    'yourselves', 'the'])
+_STOP_WORDS = frozenset(["a", "about", "above", "above", "across", "after", "afterwards", "again", "against", "all", "almost", "alone", "along", "already", "also","although","always","am","among", "amongst", "amoungst", "amount",  "an", "and", "another", "any","anyhow","anyone","anything","anyway", "anywhere", "are", "around", "as",  "at", "back","be","became", "because","become","becomes", "becoming", "been", "before", "beforehand", "behind", "being", "below", "beside", "besides", "between", "beyond", "bill", "both", "bottom","but", "by", "call", "can", "cannot", "cant", "co", "con", "could", "couldnt", "cry", "de", "describe", "detail", "do", "done", "down", "due", "during", "each", "eg", "eight", "either", "eleven","else", "elsewhere", "empty", "enough", "etc", "even", "ever", "every", "everyone", "everything", "everywhere", "except", "few", "fifteen", "fify", "fill", "find", "fire", "first", "five", "for", "former", "formerly", "forty", "found", "four", "from", "front", "full", "further", "get", "give", "go", "had", "has", "hasnt", "have", "he", "hence", "her", "here", "hereafter", "hereby", "herein", "hereupon", "hers", "herself", "him", "himself", "his", "how", "however", "hundred", "ie", "if", "in", "inc", "indeed", "interest", "into", "is", "it", "its", "itself", "keep", "last", "latter", "latterly", "least", "less", "ltd", "made", "many", "may", "me", "meanwhile", "might", "mill", "mine", "more", "moreover", "most", "mostly", "move", "much", "must", "my", "myself", "name", "namely", "neither", "never", "nevertheless", "next", "nine", "no", "nobody", "none", "noone", "nor", "not", "nothing", "now", "nowhere", "of", "off", "often", "on", "once", "one", "only", "onto", "or", "other", "others", "otherwise", "our", "ours", "ourselves", "out", "over", "own","part", "per", "perhaps", "please", "put", "rather", "re", "same", "see", "seem", "seemed", "seeming", "seems", "serious", "several", "she", "should", "show", "side", "since", "sincere", "six", "sixty", "so", "some", "somehow", "someone", "something", "sometime", "sometimes", "somewhere", "still", "such", "system", "take", "ten", "than", "that", "the", "their", "them", "themselves", "then", "thence", "there", "thereafter", "thereby", "therefore", "therein", "thereupon", "these", "they", "thickv", "thin", "third", "this", "those", "though", "three", "through", "throughout", "thru", "thus", "to", "together", "too", "top", "toward", "towards", "twelve", "twenty", "two", "un", "under", "until", "up", "upon", "us", "very", "via", "was", "we", "well", "were", "what", "whatever", "when", "whence", "whenever", "where", "whereafter", "whereas", "whereby", "wherein", "whereupon", "wherever", "whether", "which", "while", "whither", "who", "whoever", "whole", "whom", "whose", "why", "will", "with", "within", "without", "would", "yet", "you", "your", "yours", "yourself", "yourselves", "the"])
 
 
 def word_split(text):
@@ -152,43 +114,43 @@ def write_to_file(result,N):
     try:
         output.truncate()
         print "Writing to file..."
-        output.write("<?xml version='1.0' encoding='ISO-8859-1'?>"+"\n")
-        output.write("<!-- index: contains all tokens -->"+"\n")
-        output.write("<!-- w: stand for single token -->"+"\n")
-        output.write("<!-- n: name of the token -->"+"\n")
-        output.write("<!-- ds: stand for documents that contain the token, one token can exists in lots of documents -->"+"\n")
-        output.write("<!-- d: stand for one single document that contains this token-->"+"\n")
-        output.write("<!-- dn: one single document name-->"+"\n")
-        output.write("<!-- tf-idf: tf-idf -->"+"\n")
-        output.write("<!-- p: position -->"+"\n")
-        output.write("<!-- wp: word position -->"+"\n")
-        output.write("<!-- lp: letter position-->"+"\n")
-        output.write("<index>"+"\n")
+        output.write("<?xml version='1.0' encoding='ISO-8859-1'?>")
+        output.write("<!-- index: contains all tokens -->")
+        output.write("<!-- w: stand for single token -->")
+        output.write("<!-- n: name of the token -->")
+        output.write("<!-- ds: stand for documents that contain the token, one token can exists in lots of documents -->")
+        output.write("<!-- d: stand for one single document that contains this token-->")
+        output.write("<!-- dn: one single document name-->")
+        output.write("<!-- tf-idf: tf-idf -->")
+        output.write("<!-- p: position -->")
+        output.write("<!-- wp: word position -->")
+        output.write("<!-- lp: letter position-->")
+        output.write("<index>")
         
        
         for (word,element) in result:
-            output.write("<w>"+"\n")
-            output.write("<n>"+word+"</n>"+"\n")
-            output.write("<ds>"+"\n")
+            output.write("<w>")
+            output.write("<n>"+word+"</n>")
+            output.write("<ds>")
             
             #i = len(element)
             
             df = idf(N,len(element))
             
             for file in element:
-                output.write("<d>"+"\n")
-                output.write("<dn>"+file+"</dn>"+"\n")
+                output.write("<d>")
+                output.write("<dn>"+file+"</dn>")
                 
-                output.write("<tf-idf>"+str(tf(len(element[file]))*df)+"</tf-idf>"+"\n")
+                output.write("<tf-idf>"+str(tf(len(element[file]))*df)+"</tf-idf>")
                 
                 for position in element[file]:
-                    output.write("<p>"+"\n")
-                    output.write("<wp>"+str(position[0])+"</wp>"+"\n")
-                    output.write("<lp>"+str(position[1])+"</lp>"+"\n")
-                    output.write("</p>"+"\n")
-                output.write("</d>"+"\n")
-            output.write("</ds>"+"\n")
-            output.write("</w>"+"\n")
+                    output.write("<p>")
+                    output.write("<wp>"+str(position[0])+"</wp>")
+                    output.write("<lp>"+str(position[1])+"</lp>")
+                    output.write("</p>")
+                output.write("</d>")
+            output.write("</ds>")
+            output.write("</w>")
                 #i-=1
                 #if i>0:
                    # output1.write(",")
@@ -206,8 +168,8 @@ if __name__ == '__main__':
     # Build Inverted-Index for documents
     inverted = {}
     
-    root_dir = 'documents_test'
-    #root_dir = '/Users/snorlax/Downloads/WEBPAGES_CLEAN'
+    #root_dir = 'documents_test'
+    root_dir = '/Users/snorlax/Downloads/WEBPAGES_CLEAN'
     
     documents = {}
     
@@ -228,10 +190,10 @@ if __name__ == '__main__':
         inverted_index_add(inverted, doc_id, doc_index)
         if count%400 == 0:
             elapsed = (time.clock() - start)
-            print str(count) + " documents have been processed, " + str(elapsed) + "s for these 400 documents"
+            print str(count) + "/"+str(N) +" documents have been processed, " + str(elapsed) + "s for these 400 documents"
             start = time.clock()
             
-    print "Finish all files, " + "overall time: " + str(time.clock()-begin) + "s"
+    print "Finish all "+str(N)+" files, " + "overall time: " + str(time.clock()-begin) + "s"
     #
     # Print Inverted-Index
     #for word, doc_locations in inverted.iteritems():
