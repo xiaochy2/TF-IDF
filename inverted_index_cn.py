@@ -1,8 +1,6 @@
 # coding:utf-8
 import os
-import jieba
 import re
-
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -49,20 +47,25 @@ _STOP_WORDS = frozenset([
 
 
 def word_split(text):
+    print text
     word_list = []
+    token = []
     
-
-    jieba_list = list(jieba.cut(text))
-    #print jieba_list
+    token += re.sub("[^A-Za-z0-9]", " ", text).split()
+    #print token
+    
     time = {}
-    for i, c in enumerate(jieba_list):
+    ind = 0
+    for i,c in enumerate(token):
 
         if c in time:  # record appear time
             time[c] += 1
         else:
-            time.setdefault(c, 0) != 0
-        if c.isalnum():  # if English or number
-            word_list.append((len(word_list), (text.index(c, time[c]), c.lower())))  # include normalize
+            time[c] = 1
+            
+        ind = text.index(c, ind)
+        word_list.append((len(word_list), (ind, c.lower())))  # include normalize
+        ind += 1
     #print word_list
     return word_list
 
@@ -138,13 +141,7 @@ if __name__ == '__main__':
     
     # Build Inverted-Index for documents
     inverted = {}
-    # documents = {}
-    #
-    # doc1 = u"开发者可以指定自己自定义的词典，以便包含jieba词库里没有的词"
-    # doc2 = u"军机处长到底是谁，Python Perl"
-    #
-    # documents.setdefault("doc1", doc1)
-    # documents.setdefault("doc2", doc2)
+    
     root_dir = 'documents_test'
     documents = {}
     
@@ -152,26 +149,49 @@ if __name__ == '__main__':
         for filename in files:
             if filename != '.DS_Store' or 'bookkeeping.json' or 'bookkeeping.tsv':
                 f = open(root +'/'+ filename).read()
-                documents.setdefault((root +'/'+ filename).decode('utf-8'), f)
+                documents.setdefault((root[len(root_dir)+1:] +'/'+ filename), f)
+    
     for doc_id, text in documents.iteritems():
+        print "Processing" + str(doc_id) + "document" + "..."
         doc_index = inverted_index(text)
         inverted_index_add(inverted, doc_id, doc_index)
-        print inverted
+    print "Finish all files"
+    #
     # Print Inverted-Index
     #for word, doc_locations in inverted.iteritems():
         #print word, doc_locations
 
     # Search something and print results
-    queries = ['bren']
+    result=sorted(inverted.items(),key=lambda k:k[0])
+    output1=open('index.txt','w')
+       
+    try:
+        output1.truncate()
+        print "Writing to file..."
+        for (word,element) in result:
+            output1.write(word+"\t")
+            
+            i = len(element)
+            for file in element:
+                
+                output1.write(file+":")
+                for position in element[file]:
+                    output1.write("("+str(position[0])+","+str(position[1])+")")
+                i-=1
+                if i>0:
+                    output1.write(",")
+            output1.write("\n")
+            
+        
+    finally:
+        output1.close()
+
+    queries = ['mondego','machine learning','software engineering','security','student affairs','graduate courses']
     for query in queries:
         result_docs = search(inverted, query)
         print "Search for '%s': %s" % (query, u','.join(result_docs.keys()))  # %s是str()输出字符串%r是repr()输出对象
-
-
         def extract_text(doc, index):
             return documents[doc].decode('utf-8')[index:index + 30].replace('\n', ' ')
-
-
         if result_docs:
             for doc, offsets in result_docs.items():
                 for offset in offsets:
