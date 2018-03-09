@@ -63,18 +63,26 @@ public class Search extends HttpServlet {
             String[] queries = tokenizer(query);
             String mysql_query = searchClause(queries);
             
-            out.println("<HTML>" + "<HEAD><TITLE>" + "Search Engine" + "</TITLE></HEAD><BODY><H1>Top 10 documents that statisfy the query</H1><ul>");
+           
             //get the coresponding results
             ResultSet rs = stmt.executeQuery(mysql_query);
+            
+            if(!rs.next()) {
+            	out.println("<HTML>" + "<HEAD><TITLE>" + "Search Engine" + "</TITLE></HEAD><BODY><H1>No Result Found</H1></BODY></HTML>");
+            	return;
+            }
+            rs.previous();
+            
             
             //calculate tf.idf.
             //if there is only one word in the query, just use the pre-computed tf.idf as the results for document(the scores are sorted by mysql)
             
+            out.println("<HTML>" + "<HEAD><TITLE>" + "Search Engine" + "</TITLE></HEAD><BODY><H1>Top 10 documents that statisfy the query</H1><ol>");
             if(tokenizer(query).length==1) {
             	while(rs.next()) {
             		out.println("<li>document: "+rs.getString(1)+"<br/>tf.idf score:"+rs.getDouble(2)+"</li>");
                  }
-        		out.println("</ul></BODY></HTML>");
+        		out.println("</ol></BODY></HTML>");
             	return;
             }
             
@@ -115,7 +123,7 @@ public class Search extends HttpServlet {
         		limit++;
             }  
             
-            out.println("</ul></BODY></HTML>");
+            out.println("</ol></BODY></HTML>");
       
             /*
             JsonArray jsonArray = new JsonArray();
@@ -184,8 +192,7 @@ public class Search extends HttpServlet {
 				search.append(" and ");
 			}
 		}
-		return search.toString();
-		   
+		return search.toString();		   
 	}
 		   
 }
