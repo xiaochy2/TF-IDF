@@ -75,40 +75,6 @@ def tf(numOfp):
 def idf(N,leng):
     return math.log10(N/float(leng))
 
-def search(inverted, query):
-    words = [word for _, (offset, word) in word_index(query) if word in inverted]  # query_words_list
-    results = [set(inverted[word].keys()) for word in words]
-    # x = map(lambda old: old+1, x) 
-    doc_set = reduce(lambda x, y: x & y, results) if results else []
-    precise_doc_dic = {}
-    if doc_set:
-        for doc in doc_set:
-            index_list = [[indoff[0] for indoff in inverted[word][doc]] for word in words]
-            offset_list = [[indoff[1] for indoff in inverted[word][doc]] for word in words]
-
-            precise_doc_dic = precise(precise_doc_dic, doc, index_list, offset_list, 1)  # 词组查询
-            precise_doc_dic = precise(precise_doc_dic, doc, index_list, offset_list, 2)  # 临近查询
-            precise_doc_dic = precise(precise_doc_dic, doc, index_list, offset_list, 3)  # 临近查询
-
-        return precise_doc_dic
-    else:
-        return {}
-
-
-def precise(precise_doc_dic, doc, index_list, offset_list, range):
-    if precise_doc_dic:
-        if range != 1:
-            return precise_doc_dic  # 如果已找到词组,不需再进行临近查询
-    phrase_index = reduce(lambda x, y: set(map(lambda old: old + range, x)) & set(y), index_list)
-    phrase_index = map(lambda x: x - len(index_list) - range + 2, phrase_index)
-
-    if len(phrase_index):
-        phrase_offset = []
-        for po in phrase_index:
-            phrase_offset.append(offset_list[0][index_list[0].index(po)])  # offset_list[0]代表第一个单词的字母偏移list
-        precise_doc_dic[doc] = phrase_offset
-    return precise_doc_dic
-
 def write_to_file(result,N):
     output=open('index.xml','w')
     try:
@@ -194,27 +160,11 @@ if __name__ == '__main__':
             start = time.clock()
             
     print "Finish all "+str(N)+" files, " + "overall time: " + str(time.clock()-begin) + "s"
-    #
+    
     # Print Inverted-Index
     #for word, doc_locations in inverted.iteritems():
         #print word, doc_locations
 
-    # Search something and print results
+   
     result=sorted(inverted.items(),key=lambda k:k[0])
     write_to_file(result,N)
-'''
-    queries = ['mondego','machine learning','software engineering','security','student affairs','graduate courses']
-    for query in queries:
-        result_docs = search(inverted, query)
-        print "Search for '%s': %s" % (query, u','.join(result_docs.keys()))  # %s是str()输出字符串%r是repr()输出对象
-        def extract_text(doc, index):
-            return documents[doc].decode('utf-8')[index:index + 30].replace('\n', ' ')
-        if result_docs:
-            for doc, offsets in result_docs.items():
-                for offset in offsets:
-                    print '   - %s...' % extract_text(doc, offset)
-        else:
-            print 'Nothing found!'
-
-        print
-'''
