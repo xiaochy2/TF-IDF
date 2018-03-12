@@ -77,12 +77,13 @@ def idf(N,leng):
 
 def write_to_file(result,N):  
     print "Writing to file..."
-    batch = 1000
+    batch = 50
     count = 1
     string = ""
     length = len(result)
     for (word,element) in result:
-        
+        if not word[0].isalpha():
+            continue
         
             
         string+="<w>"
@@ -99,10 +100,10 @@ def write_to_file(result,N):
             string+="<dn>"+file+"</dn>"
             
             string = string + "<tf-idf>"+str(tf(len(element[file]))*df)+"</tf-idf>"
-            print file
-            print element[file]
+            #print file
+            #print element[file]
             for position in element[file]:
-                print str(position[0]) + ","+str(position[1])
+                #print str(position[0]) + ","+str(position[1])
                 string += "<p>"
                 string = string +"<wp>"+str(position[0])+"</wp>"
                 string = string +"<lp>"+str(position[1])+"</lp>"
@@ -111,7 +112,7 @@ def write_to_file(result,N):
             
         string = string +"</ds>"
         string = string +"</w>"
-        print str(6)
+        
         if count % batch == 0:
             string = "<?xml version='1.0' encoding='ISO-8859-1'?><!-- index: contains all tokens --><!-- w: stand for single token --><!-- n: name of the token --><!-- ds: stand for documents that contain the token, one token can exists in lots of documents --><!-- d: stand for one single document that contains this token--><!-- dn: one single document name--><!-- tf-idf: tf-idf --><!-- p: position --><!-- wp: word position --><!-- lp: letter position--><index>" + string
             output = open('batch/index' + str(count/batch) + '.xml','w')

@@ -78,6 +78,7 @@ def idf(N,leng):
 def write_to_file(result,N):
     output=open('index.xml','w')
     try:
+        
         output.truncate()
         print "Writing to file..."
         output.write("<?xml version='1.0' encoding='ISO-8859-1'?>")
@@ -95,6 +96,8 @@ def write_to_file(result,N):
         
        
         for (word,element) in result:
+            if not word[0].isalpha():
+                continue
             output.write("<w>")
             output.write("<n>"+word+"</n>")
             output.write("<ds>")
