@@ -1,0 +1,53 @@
+@charset "UTF-8";
+
+body {
+	background-color:white;
+	background-position:top;
+    background-repeat:no-repeat;
+    background-attachment:fixed
+}
+
+.searchdiv {
+	margin-top: 250px;
+	margin-left: 420px;	
+	vertical-align: top;
+}
+
+.te {
+	background-color: white;
+	border: 1;
+	box-sizing: border-box;
+	border-color:DeepSkyBlue;
+	border-style: solid;
+	border-width: 2px;
+	outline:none;
+    padding: 5px 5px;
+    text-align: left;
+    text-decoration: none;
+    Color: black;
+    display: inline-block;
+    font-size: 25px;
+    margin: 2px 2px;
+    height:43px;
+    width:600px;
+}
+
+.go {
+	background-color: DeepSkyBlue;
+    border: 1;
+    box-sizing: border-box;
+	border-color:DeepSkyBlue;
+	border-style: solid;
+	border-width: 2px;
+	outline:none;
+    color: white;
+    padding: 5px 5px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 26px;
+    margin: 0px -6px;
+    cursor: pointer;
+    height:44px;
+    width:80px;
+}
+
