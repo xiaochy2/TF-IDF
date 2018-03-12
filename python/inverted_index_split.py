@@ -30,7 +30,7 @@ def word_split(text):
             time[c] = 1
             
         ind = text.index(c, ind)
-        word_list.append((len(word_list), (ind, ps.stem(c.lower()))))  # include normalize
+        word_list.append((len(word_list), (ind, c.lower())))  # include normalize
         ind += 1
     #print word_list
     return word_list
@@ -75,58 +75,71 @@ def tf(numOfp):
 def idf(N,leng):
     return math.log10(N/float(leng))
 
-def write_to_file(result,N):
-    output=open('index.xml','w')
-    try:
-        output.truncate()
-        print "Writing to file..."
-        output.write("<?xml version='1.0' encoding='ISO-8859-1'?>")
-        output.write("<!-- index: contains all tokens -->")
-        output.write("<!-- w: stand for single token -->")
-        output.write("<!-- n: name of the token -->")
-        output.write("<!-- ds: stand for documents that contain the token, one token can exists in lots of documents -->")
-        output.write("<!-- d: stand for one single document that contains this token-->")
-        output.write("<!-- dn: one single document name-->")
-        output.write("<!-- tf-idf: tf-idf -->")
-        output.write("<!-- p: position -->")
-        output.write("<!-- wp: word position -->")
-        output.write("<!-- lp: letter position-->")
-        output.write("<index>")
+def write_to_file(result,N):  
+    print "Writing to file..."
+    batch = 1000
+    count = 1
+    string = ""
+    length = len(result)
+    for (word,element) in result:
         
-       
-        for (word,element) in result:
-            output.write("<w>")
-            output.write("<n>"+word+"</n>")
-            output.write("<ds>")
+        
             
-            #i = len(element)
+        string+="<w>"
+        string=string+"<n>"+word+"</n>"
+        string+="<ds>"
+        
+        #i = len(element)
+        
+        df = idf(N,len(element))
+        
+        for file in element:
             
-            df = idf(N,len(element))
+            string+="<d>"
+            string+="<dn>"+file+"</dn>"
             
-            for file in element:
-                output.write("<d>")
-                output.write("<dn>"+file+"</dn>")
+            string = string + "<tf-idf>"+str(tf(len(element[file]))*df)+"</tf-idf>"
+            print file
+            print element[file]
+            for position in element[file]:
+                print str(position[0]) + ","+str(position[1])
+                string += "<p>"
+                string = string +"<wp>"+str(position[0])+"</wp>"
+                string = string +"<lp>"+str(position[1])+"</lp>"
+                string = string +"</p>"
+            string = string +"</d>"
+            
+        string = string +"</ds>"
+        string = string +"</w>"
+        print str(6)
+        if count % batch == 0:
+            string = "<?xml version='1.0' encoding='ISO-8859-1'?><!-- index: contains all tokens --><!-- w: stand for single token --><!-- n: name of the token --><!-- ds: stand for documents that contain the token, one token can exists in lots of documents --><!-- d: stand for one single document that contains this token--><!-- dn: one single document name--><!-- tf-idf: tf-idf --><!-- p: position --><!-- wp: word position --><!-- lp: letter position--><index>" + string
+            output = open('batch/index' + str(count/batch) + '.xml','w')
+            
+            try:
+                string = string +"</index>"
+                output.truncate()
+                output.write(string)
+                string = ""
+                print "finish writing " + str(count/batch) + " files"
+            finally:
                 
-                output.write("<tf-idf>"+str(tf(len(element[file]))*df)+"</tf-idf>")
-                
-                for position in element[file]:
-                    output.write("<p>")
-                    output.write("<wp>"+str(position[0])+"</wp>")
-                    output.write("<lp>"+str(position[1])+"</lp>")
-                    output.write("</p>")
-                output.write("</d>")
-            output.write("</ds>")
-            output.write("</w>")
-                #i-=1
-                #if i>0:
-                   # output1.write(",")
-        output.write("</index>")
+                output.close()
+        elif count >= length:
+            string = "<?xml version='1.0' encoding='ISO-8859-1'?><!-- index: contains all tokens --><!-- w: stand for single token --><!-- n: name of the token --><!-- ds: stand for documents that contain the token, one token can exists in lots of documents --><!-- d: stand for one single document that contains this token--><!-- dn: one single document name--><!-- tf-idf: tf-idf --><!-- p: position --><!-- wp: word position --><!-- lp: letter position--><index>" + string
+            output = open('batch/index' + str(count/batch+1) + '.xml','w')
+            try:
+                string = string +"</index>"
+                output.truncate()
+                output.write(string)
+                print "Finish writing!"
+            finally:
+                output.close()
+        count+=1
         
         
         
-    finally:
-        output.close()
-        print "Finish writing!"
+    
         
         
 if __name__ == '__main__':
@@ -134,8 +147,9 @@ if __name__ == '__main__':
     # Build Inverted-Index for documents
     inverted = {}
     
-    root_dir = 'small_test'
-    #root_dir = '/Users/snorlax/Downloads/WEBPAGES_CLEAN'
+    #root_dir = 'small_test'
+    #root_dir = 'documents_test'
+    root_dir = '/Users/snorlax/Downloads/WEBPAGES_CLEAN'
     
     documents = {}
     
