@@ -120,7 +120,7 @@ public class Search extends HttpServlet {
             for(int i=0;i<dsList.size() && limit<=5;i++) {
             	String docu=dsList.get(i).getDocu();
             	double score=dsList.get(i).getScore();            	
-        		out.println("<li>document: "+docu+"<br/>tf.idf score:"+score+"</li>");    		
+        		out.println("<li><a href=\""+JsonConverter.Url(docu)+"\">" + docu + "</a><br/>tf.idf score:"+score+"</li>");    		
         		limit++;
             }  
             

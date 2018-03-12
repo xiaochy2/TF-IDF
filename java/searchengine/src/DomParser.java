@@ -28,37 +28,44 @@ import org.xml.sax.SAXException;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-/**
- * Servlet implementation class DomParser_mains
- */
-@WebServlet("/DomParser")
-public class DomParser extends HttpServlet {
-	private static final long serialVersionUID = 1L;   
+public class DomParser {
 	
-	List pairs;
+	public static void main(String[] args) {
+		long startTime = System.currentTimeMillis();	
+		for (int i=1; i<16; i++) {
+			Parser ps = new Parser();
+			String name = "index" + i + ".xml";
+			ps.setFile(name);
+			ps.run();	
+			if (i%10 == 0) {
+		    	System.out.println("already insert:" + i);
+		    }
+		}
+		long endTime = System.currentTimeMillis();
+		System.out.println("Program running time: " + (endTime - startTime) + "ms");	
+	}	
+}
+
+	
+class Parser {
 	Document dom;
-	int i;
-		
-	public DomParser(){
-		pairs = new ArrayList();
+	List pairs = new ArrayList();
+	String file;
+	
+	public void setFile(String name) {
+		this.file = name;
 	}
 	
 	
-	private void parseFile(){
+	private void parseFile(String file){
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();		
 		try {			
 			//Using factory get an instance of document builder
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			
 			//parse using builder to get DOM representation of the XML file
-			InputStream in = getServletContext().getResourceAsStream("/WEB-INF/index_test.xml");					
-			dom = db.parse(in);			
+			//InputStream in = getServletContext().getResourceAsStream("/WEB-INF/index_test.xml");					
+			dom = db.parse(file);			
 
 		}catch(ParserConfigurationException pce) {
 			pce.printStackTrace();
@@ -161,7 +168,7 @@ public class DomParser extends HttpServlet {
 	
 	
 	public void run() {
-		parseFile();
+		parseFile(file);
 		parseWDPair();
 				
 		try {
@@ -223,12 +230,7 @@ public class DomParser extends HttpServlet {
 		
 		
 		connection.setAutoCommit(true);		
-		Statement show = connection.createStatement();
-		
-		ResultSet count = (ResultSet)show.executeQuery("select count(*) from indexNum;");
-	    count.next();
-	    i = count.getInt(1);
-	    
+		    
 		try {
 			if(psInsertPair!=null) psInsertPair.close();
 			if (connection!=null) connection.close();
@@ -237,39 +239,5 @@ public class DomParser extends HttpServlet {
 		}
 	
 	}
-
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		//response.getWriter().append("Served at: ").append(request.getContextPath());
-		response.setContentType("text/html");
-		PrintWriter out = response.getWriter();
-		
-		out.println("<html><head><title>Result</title></head>");
-        out.println("<body><h1 align=\"center\">Result</h1>");
-        
-		long startTime = System.currentTimeMillis();
-		
-		run();
-        
-        out.println("<li>Num of pairs inserted: "+ pairs.size()+"</li>");  
-        
-        out.println("<h2>WDPairData</h2><ul>");
-        out.println("<li>Num of word document pairs established: "+ i +"</li></ul>");
-		
-		long endTime = System.currentTimeMillis();		
-		out.println("<t><b>Program running time: " + (endTime - startTime) + "ms</b></t>");
-	}
-
 	
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
-	}
-
 }
