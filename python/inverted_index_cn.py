@@ -30,7 +30,7 @@ def word_split(text):
             time[c] = 1
             
         ind = text.index(c, ind)
-        word_list.append((len(word_list), (ind, ps.stem(c.lower()))))  # include normalize
+        word_list.append((len(word_list), (ind, c.lower())))  # include normalize
         ind += 1
     #print word_list
     return word_list
@@ -96,7 +96,7 @@ def write_to_file(result,N):
         
        
         for (word,element) in result:
-            if not word[0].isalpha():
+            if len(word)>18:
                 continue
             output.write("<w>")
             output.write("<n>"+word+"</n>")
@@ -137,8 +137,8 @@ if __name__ == '__main__':
     # Build Inverted-Index for documents
     inverted = {}
     
-    root_dir = 'small_test'
-    #root_dir = '/Users/snorlax/Downloads/WEBPAGES_CLEAN'
+    #root_dir = 'small_test'
+    root_dir = '/Users/snorlax/Downloads/WEBPAGES_CLEAN'
     
     documents = {}
     
