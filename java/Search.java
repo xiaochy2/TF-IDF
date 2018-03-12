@@ -1,10 +1,15 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
+import org.apache.commons.io.FileUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -77,11 +82,19 @@ public class Search extends HttpServlet {
             //calculate tf.idf.
             //if there is only one word in the query, just use the pre-computed tf.idf as the results for document(the scores are sorted by mysql)
             
-            out.println("<HTML>" + "<HEAD><TITLE>" + "Search Engine" + "</TITLE></HEAD><BODY><H1>Top 10 documents that statisfy the query</H1><ol>");
+            out.println("<HTML>" + "<HEAD><TITLE>" + "Search Engine" + "</TITLE></HEAD><BODY><H1>Top 5 documents that statisfy the query</H1><ol>");
             if(tokenizer(query).length==1) {
             	while(rs.next()) {
-            		out.println("<li>document: "+rs.getString(1)+"<br/>tf.idf score:"+rs.getDouble(2)+"</li>");
-                 }
+            		String url = rs.getString(1);
+            		out.println("<li><a href=\""+JsonConverter.Url(url)+"\">" + rs.getString(1) + "</a><br/>tf.idf score:"+rs.getDouble(2)+"<br/>");
+            		String[] s = findP(url, queries);
+            		for (int j=0; j<queries.length; j++) {
+            			out.println(s[j]+"<br/>");
+            		}
+            		out.println("</li>");
+            	
+            	
+            	}
         		out.println("</ol></BODY></HTML>");
             	return;
             }
@@ -116,10 +129,16 @@ public class Search extends HttpServlet {
             
             int limit = 0;
             
-            for(int i=0;i<dsList.size() && limit<=10;i++) {
+            for(int i=0;i<dsList.size() && limit<=4;i++) {
             	String docu=dsList.get(i).getDocu();
             	double score=dsList.get(i).getScore();            	
-        		out.println("<li>document: "+docu+"<br/>tf.idf score:"+score+"</li>");    		
+        		out.println("<li><a href=\""+JsonConverter.Url(docu)+"\">" + docu + "</a><br/>tf.idf score:"+score+"<br/>");
+        		String[] s = position(docu, queries);
+        		for (int j=0; j<queries.length; j++) {
+        			out.println(s[j]+"<br/>");
+        		}
+        		out.println("</li>");
+        		
         		limit++;
             }  
             
@@ -174,7 +193,7 @@ public class Search extends HttpServlet {
 	public static String searchClause(String[] terms){
 		StringBuffer search  = new StringBuffer();
 		if(terms.length==1) {
-			search.append("select docu,score from indexNum where term=\'"+terms[0]+"\' ORDER BY score DESC limit 0,10");
+			search.append("select docu,score from indexNum where term=\'"+terms[0]+"\' ORDER BY score DESC limit 0,5");
 			return search.toString();
 			
 		}
@@ -194,5 +213,64 @@ public class Search extends HttpServlet {
 		}
 		return search.toString();		   
 	}
+	
+	public String[] position(String filename, String[] term) {
+		String path = "/SearchEngine/webpages_clean/" + filename;
+		System.out.println(path);
+		String[] p = new String[term.length];
+		FileInputStream in = null;
+		InputStreamReader isr = null;
+		BufferedReader br = null;
+		
+		try {
+						
+			
+			//System.out.println(line);
+			for (int i=0; i<term.length; i++) {
+				in = new FileInputStream(path);
+				isr = new InputStreamReader(in);
+				br = new BufferedReader(isr);
+				String line = new String();
+				while ((line = br.readLine()) != null) {
+					if (line.contains(term[i])) {
+						p[i] = line;
+						System.out.println(line);
+						break;
+					}
+				}		
+			}
+		} catch (IOException e1) {
+			System.exit(-1);
+		}
+		
+		return p;
+	}
+	
+	
+	public String[] findP(String filename, String[] term) throws IOException{
+		String path = "/SearchEngine/webpages_clean/" + filename;
+		System.out.println(path);
+		String[] p = new String[term.length];
+		
+		File file = new File(path);
+        String content = FileUtils.readFileToString(file);
+        //System.out.println(content);
+		
+        for (int i=0; i<term.length; i++) {
+        	int occ1 = content.toLowerCase().indexOf(term[i]);
+        	System.out.println(occ1);
+        	if (content.contains(term[i])) {
+        		System.out.println("you");
+        	}
+        	if (occ1 != -1) {
+        		p[i] = content.substring(occ1-1, occ1 + 10);
+        		System.out.println(p[i]);
+        	}   			
+        }
+        return p;	
+		
+	}
+	
+	
 		   
 }
