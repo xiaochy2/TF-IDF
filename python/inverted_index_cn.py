@@ -96,7 +96,7 @@ def write_to_file(result,N):
         
        
         for (word,element) in result:
-            if len(word)>18:
+            if len(word)>18 or word[0].isdigit():
                 continue
             output.write("<w>")
             output.write("<n>"+word+"</n>")
