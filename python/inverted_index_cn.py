@@ -30,7 +30,7 @@ def word_split(text):
             time[c] = 1
             
         ind = text.index(c, ind)
-        word_list.append((len(word_list), (ind, c.lower())))  # include normalize
+        word_list.append((len(word_list), (ind, ps.stem(c.lower()))))  # include normalize
         ind += 1
     #print word_list
     return word_list
@@ -137,8 +137,8 @@ if __name__ == '__main__':
     # Build Inverted-Index for documents
     inverted = {}
     
-    #root_dir = 'small_test'
-    root_dir = '/Users/snorlax/Downloads/WEBPAGES_CLEAN'
+    root_dir = 'documents_test'
+    #root_dir = '/Users/snorlax/Downloads/WEBPAGES_CLEAN'
     
     documents = {}
     
