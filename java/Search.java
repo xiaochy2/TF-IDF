@@ -82,11 +82,11 @@ public class Search extends HttpServlet {
             //calculate tf.idf.
             //if there is only one word in the query, just use the pre-computed tf.idf as the results for document(the scores are sorted by mysql)
             
-            out.println("<HTML>" + "<HEAD><TITLE>" + "Search Engine" + "</TITLE></HEAD><BODY><H1>Top 5 documents that statisfy the query</H1><ol>");
+            out.println("<HTML>" + "<HEAD><TITLE>" + "Search Engine" + "</TITLE></HEAD><BODY><H1>Top 5 documents that statisfy the query: "+query +"</H1><ol>");
             if(tokenizer(query).length==1) {
             	while(rs.next()) {
             		String url = rs.getString(1);
-            		out.println("<li><a href=\""+JsonConverter.Url(url)+"\">" + rs.getString(1) + "</a><br/>tf.idf score:"+rs.getDouble(2)+"<br/>");
+            		out.println("<li><a href=\""+JsonConverter.Url(url)+"\">" + rs.getString(1)+": "+JsonConverter.Url(url)+ "</a><br/>tf.idf score:"+rs.getDouble(2)+"<br/>");
             		String[] s = findP(url, queries);
             		for (int j=0; j<queries.length; j++) {
             			out.println(s[j]+"<br/>");
@@ -132,8 +132,8 @@ public class Search extends HttpServlet {
             for(int i=0;i<dsList.size() && limit<=4;i++) {
             	String docu=dsList.get(i).getDocu();
             	double score=dsList.get(i).getScore();            	
-        		out.println("<li><a href=\""+JsonConverter.Url(docu)+"\">" + docu + "</a><br/>tf.idf score:"+score+"<br/>");
-        		String[] s = position(docu, queries);
+        		out.println("<li><a href=\""+JsonConverter.Url(docu)+"\">" + docu+":  "+JsonConverter.Url(docu) + "</a><br/>tf.idf score:"+score+"<br/>");
+        		String[] s = findP(docu, queries);
         		for (int j=0; j<queries.length; j++) {
         			out.println(s[j]+"<br/>");
         		}
@@ -259,11 +259,16 @@ public class Search extends HttpServlet {
         for (int i=0; i<term.length; i++) {
         	int occ1 = content.toLowerCase().indexOf(term[i]);
         	System.out.println(occ1);
-        	if (content.contains(term[i])) {
-        		System.out.println("you");
-        	}
+        	
         	if (occ1 != -1) {
-        		p[i] = content.substring(occ1-1, occ1 + 10);
+        		int k=0;
+        		if (content.length()<occ1+100) {
+        			k = content.length()-1;
+        		}else {
+        			k = occ1+100;
+        		}
+        		
+        		p[i] = content.substring(occ1-1, k);
         		System.out.println(p[i]);
         	}   			
         }
