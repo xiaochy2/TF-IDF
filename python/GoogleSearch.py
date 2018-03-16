@@ -14,8 +14,9 @@ import os
 def googleSearch(word):
     result = []   
     search_result = google.search(word+" site:ics.uci.edu", 10)
-    for item in search_result:
-        result.append(item[7:-1])
+    for GoogleResult in search_result:
+        print GoogleResult.link[7:-1]
+        result.append(GoogleResult.link[7:-1])
     return result
 def parse(search_dir):
     words =[]
@@ -24,7 +25,7 @@ def parse(search_dir):
         for filename in files:
             if filename != ".DS_Store":
                 words.append(filename)              
-                f = open(root +'/'+ filename).read()
+                f = open(root +'/'+ filename)
                 url = []
                 for line in f:
                     url.append(line.split(":")[1])
@@ -59,6 +60,7 @@ if __name__ == '__main__':
         dict = getrelavance(search_results)
         search_DCG = DCG(urls[word],dict)
         NDCG = search_DCG/DCG(googleSearch(word),dict)
+        print NDCG
         NDCG_avg += NDCG
-    NDCG_avg/=5
+    NDCG_avg/=10
     print NDCG_avg
