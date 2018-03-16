@@ -13,10 +13,23 @@ import os
 
 def googleSearch(word):
     result = []   
-    search_result = google.search(word+" site:ics.uci.edu", 10)
+    search_result = google.search(word+" site:ics.uci.edu", 5)
+    tsv = open("bookkeeping.tsv").read()
     for GoogleResult in search_result:
-        print GoogleResult.link[7:-1]
-        result.append(GoogleResult.link[7:-1])
+        str = GoogleResult.link
+        if "https" in str:
+            str = str[8:]
+        else:
+            str = str[7:]
+        if str[-1] == '/':
+            
+            str = str[:-1]
+            
+            
+        if str in tsv:
+            
+            result.append(str)
+    
     return result
 def parse(search_dir):
     words =[]
@@ -28,19 +41,41 @@ def parse(search_dir):
                 f = open(root +'/'+ filename)
                 url = []
                 for line in f:
-                    url.append(line.split(":")[1])
+                    string = line.strip('\n').split(":")[1]
+                    if string[-1] == '/':
+                        string = string[:-1]
+                    url.append(string)
                 urls[filename] = url
     return words,urls
 
-def DCG(url,dict):
-    sum = 0
+def NDCG(url,dict):
+    length = len(dict)
+    #print length
+    result = []
+    ideal = 0.0
+    
+    sum = 0.0
+    value = 0.0
     for i in range(len(url)):
-        if dict.has_key(url[i]):
-            if i == 0:               
+        if i == 0:
+            if dict.has_key(url[i]):
+                           
                 sum += dict[url[i]]
+                ideal += length
+                value = sum/ideal
             else:
-                sum += dict[url[i]]/math.log(i+1)
-    return sum
+                ideal += length
+        elif dict.has_key(url[i]):
+            sum += dict[url[i]]/math.log(i+1,2)
+            ideal += (length-i)/math.log(i+1,2)
+            value = sum/ideal
+        else:
+            ideal += (length-i)/math.log(i+1,2)
+            value = sum/ideal
+        #print str(sum)+","+str(ideal)
+        print "%.2f " % value,
+        result.append(value)
+    return result
 
 def getrelavance(search_results):
     result = {}
@@ -54,13 +89,21 @@ def getrelavance(search_results):
 if __name__ == '__main__':
     search_dir = "search_output"
     words,urls = parse(search_dir)  
-    NDCG_avg = 0.0
+    rr = [0.0,0.0,0.0,0.0,0.0]
     for word in words:
+        print word +": ",
         search_results = googleSearch(word)
+        
         dict = getrelavance(search_results)
-        search_DCG = DCG(urls[word],dict)
-        NDCG = search_DCG/DCG(googleSearch(word),dict)
-        print NDCG
-        NDCG_avg += NDCG
-    NDCG_avg/=10
-    print NDCG_avg
+        
+        
+        result= NDCG(urls[word],dict)
+        print
+        for i in range(len(result)):
+            rr[i] += result[i]
+        #break
+    for i in range(len(result)):
+        rr[i]/=10
+    print "NDCG: ",
+    for x in rr:
+        print "%.2f " % x,
